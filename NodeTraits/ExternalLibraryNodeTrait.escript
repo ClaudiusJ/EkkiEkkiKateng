@@ -7,17 +7,13 @@
 
 assert(EScript.VERSION>=607); // 0.6.7
 
-var t = new (Std.require('Std/Traits/GenericTrait'))('EkkiEkkiKateng.TargetNodeTrait');
+var t = new (Std.require('Std/Traits/GenericTrait'))('EkkiEkkiKateng.VirtualTargetNodeTrait');
 
 static Node = Std.require('EkkiEkkiKateng/Node');
-static Constants = Std.require('EkkiEkkiKateng/Constants');
-	
-t.attributes.getTargetName ::= fn(){
-	return this.getLocalOption( Constants.NAME );
-};
 
 t.onInit += fn(Node node, String targetName){
-	Std.require('Std/Traits/basics').addTrait(node,Std.require('EkkiEkkiKateng/NodeTraits/_SpecificNodeTrait'),Constants.NODE_TYPE_TARGET);
-	node.setOption( Constants.NAME, targetName);
+	var Constants = Std.require('EkkiEkkiKateng/Constants');
+	Std.require('Std/Traits/basics').addTrait(node,Std.require('EkkiEkkiKateng/NodeTraits/_SpecificNodeTrait'),Constants.NODE_TYPE_VIRTUAL_TARGET);
+	node.setOption( Constants.VIRTUAL_TARGET_NAME, targetName);
 };
 return t;

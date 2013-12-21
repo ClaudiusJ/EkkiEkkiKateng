@@ -7,26 +7,77 @@
 
 assert(EScript.VERSION>=607); // 0.6.7
 
+static Node = Std.require('EkkiEkkiKateng/Node');
 static Constants = Std.require('EkkiEkkiKateng/Constants');
+static Traits = Std.require('Std/Traits/basics');
 
-var Utils = new Namespace;
-Utils.collectNodesOfType := fn(Array rootPath, type){
-	var resultPaths = [];
+/*! (internal) if callback(node) returns...
+		$BREAK, the traversal of the subtree is stopped.
+		$EXIT, the traversal is stopped.
+		something else, the traversal continues.	*/
+static traverse = fn(Node rootNode, callback){
+	var todo = [ rootNode ];
+	while(!todo.empty()){
+		var node = todo.popFront();
+		switch(callback(node)){
+			case $BREAK:
+				continue;
+			case $EXIT:
+				return;
+			default:
+				foreach(node.getNextNodes() as var nextNode)
+					todo += nextNode;
+		}
+	}
+};
+/*! (internal) if callback(path) returns...
+		$BREAK, the traversal of the subtree is stopped.
+		$EXIT, the traversal is stopped.
+		something else, the traversal continues.	*/
+static traverseWithPath = fn(Array rootPath, callback){
 	var todo = [ rootPath ];
 	while(!todo.empty()){
 		var activePath = todo.popFront();
-		var node = activePath.back();
-		if( node.getLocalOption(Constants.NODE_TYPE) == type ){
-			resultPaths += activePath.clone();
-		}
-		foreach(node.getNextNodes() as var nextNode){
-			var p = activePath.clone();
-			p += nextNode;
-			todo += p;
+		switch(callback(activePath)){
+			case $BREAK:
+				continue;
+			case $EXIT:
+				return;
+			default:
+				foreach(activePath.back().getNextNodes() as var nextNode){
+					var p = activePath.clone();
+					p += nextNode;
+					todo += p;
+				}
 		}
 	}
+};
+
+
+var Utils = new Namespace;
+
+Utils.collectNodePathsOfType := fn(Array rootPath, type){
+	var resultPaths = [];
+	traverseWithPath(rootPath, [resultPaths,type] => fn(resultPaths,type, path){
+		if( path.back().getLocalOption(Constants.NODE_TYPE) == type )
+			resultPaths += path.clone();
+	});
 	return resultPaths;
 };
+
+
+Utils.collectNodesByTrait := fn(Node rootNode, Traits.Trait trait){
+	var resultNodes = [];
+	traverse(rootNode, [resultNodes,trait] => fn(resultNodes,trait,node){ if(Traits.queryTrait(node,trait)) resultNodes += node; });
+	return resultNodes;
+};
+
+Utils.collectNodesByType := fn(Node rootNode, type){
+	var resultNodes = [];
+	traverse(rootNode, [resultNodes,type] => fn(resultNodes,type,node){ if(node.getLocalOption(Constants.NODE_TYPE)==type) resultNodes += node; });
+	return resultNodes;
+};
+
 static findOptions = fn(Array path, [Identifier,String] key){
 	var options = [];
 	path = path.clone();

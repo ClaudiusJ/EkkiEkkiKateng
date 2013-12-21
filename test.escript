@@ -77,7 +77,7 @@ foreach(Utils.scanFiles( baseDir, [".cpp",".h",".escript",".txt",".rc"] ) as var
 {
 	var vTarget = new Node;
 	Traits.addTrait( vTarget, VirtualTargetNodeTrait, "All");	//! \see EkkiEkkiKateng/VirtualTargetNodeTrait
-	foreach( Utils.collectNodesOfType( [project], Constants.NODE_TYPE_TARGET ) as var targetPath)
+	foreach( Utils.collectNodePathsOfType( [project], Constants.NODE_TYPE_TARGET ) as var targetPath)
 		vTarget += targetPath.back();
 	
 	project += vTarget;

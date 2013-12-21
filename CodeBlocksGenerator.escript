@@ -78,32 +78,37 @@ CodeBlocksGenerator.createProject := fn(Node node){
 	outln("Code::Blocks...");
 	var projectPath;
 	{
-		var paths = Utils.collectNodesOfType([node],Constants.NODE_TYPE_PROJECT);
+		var paths = Utils.collectNodePathsOfType([node],Constants.NODE_TYPE_PROJECT);
 		if(paths.count()!=1)
 			Runtime.exception("Project description contains "+paths.count()+" projects. 1 is required!");
 		projectPath = paths.front();
 	}
 	outln("Project: ", Utils.findOption(projectPath,Constants.PROJECT_NAME) );
 //		print_r(projectPath);
-	var pCompilerFlags = Utils.findOptions(projectPath,Constants.COMPILER_FLAGS);
-	print_r(pCompilerFlags);
+//	var pCompilerFlags = Utils.findOptions(projectPath,Constants.COMPILER_FLAGS);
+//	print_r(pCompilerFlags);
 	
-	var targetPaths = Utils.collectNodesOfType(projectPath,Constants.NODE_TYPE_TARGET);
-//		foreach(targetPaths as var targetPath){
-//			outln("Target: ", Utils.findOption(targetPath,Constants.TARGET_NAME) );
-//		}
+	var targetPaths = Utils.collectNodePathsOfType(projectPath,Constants.NODE_TYPE_TARGET);
+	targetPaths.filter( fn(path){
+		foreach(path as var node){
+			if(node.getLocalOption(Constants.NODE_TYPE) == Constants.NODE_TYPE_VIRTUAL_TARGET)
+				return false;
+		}
+		return true;
+	});
+
 	// collect files
 	var files = new Map;  // filename => [ node, [targets] ]
 	foreach(targetPaths as var targetPath){
-		var targetName = Utils.findOption(targetPath,Constants.TARGET_NAME) ;
-		outln("\nTarget: ", targetName);
+		var targetName = targetPath.back().getTargetName();
+		outln("Target: ", targetName);
 		var tCompilerFlags = Utils.findOptions(targetPath.slice(projectPath.count()),Constants.COMPILER_FLAGS);
-		print_r(tCompilerFlags);
+//		print_r(tCompilerFlags);
 		
-		foreach(Utils.collectNodesOfType(targetPath,Constants.NODE_TYPE_FILE) as var fileNodePath){
-			var filename = fileNodePath.back().getLocalOption(Constants.FILE_NAME);
+		foreach(Utils.collectNodesByType(targetPath.back(),Constants.NODE_TYPE_FILE) as var fileNode){
+			var filename = fileNode.getFilename();
 			if(!files[filename])
-				files[filename] = [fileNodePath.back(),[]];
+				files[filename] = [fileNode,[]];
 			files[filename][1] += targetName;
 		}
 	}
@@ -120,7 +125,8 @@ CodeBlocksGenerator.createProject := fn(Node node){
 		{ // build
 			var desc_build = addTag(desc_project,"Build");
 			foreach(targetPaths as var targetPath){
-				var desc_target = addTag(desc_build,"Target",{"title":Utils.findOption(targetPath,Constants.TARGET_NAME)});
+				var targetNode = targetPath.back();
+				var desc_target = addTag(desc_build,"Target",{"title":targetNode.getTargetName()});
 				addTag(desc_target,"Option",{"output" : Utils.findOption(targetPath,Constants.TARGET_OUTPUT),"prefix_auto":"1","extension_auto":"1"});
 				var workingDir = Utils.findOption(targetPath,Constants.TARGET_WORKING_DIR);
 				if(workingDir)
@@ -140,15 +146,17 @@ CodeBlocksGenerator.createProject := fn(Node node){
 			}
 		}
 		{ // virtual targets
-			var vTargetPaths = Utils.collectNodesOfType(projectPath,Constants.NODE_TYPE_VIRTUAL_TARGET);
+			var vTargetPaths = Utils.collectNodePathsOfType(projectPath,Constants.NODE_TYPE_VIRTUAL_TARGET);
 			var desct_vTargets = addTag(desc_project,"VirtualTargets");
 			if(!vTargetPaths.empty()){
 				foreach(vTargetPaths as var vTargetPath){
+					var vTargetName = Utils.findOption(vTargetPath,Constants.VIRTUAL_TARGET_NAME);
+					outln("vTarget: ", vTargetName);
 					var targetNames = "";
-					foreach(Utils.collectNodesOfType(vTargetPath,Constants.NODE_TYPE_TARGET) as var tPath)
-						targetNames += Utils.findOption(tPath,Constants.TARGET_NAME) + ";";
+					foreach(Utils.collectNodePathsOfType(vTargetPath,Constants.NODE_TYPE_TARGET) as var tPath)
+						targetNames += tPath.back().getTargetName() + ";";
 					addTag(desct_vTargets,"Add",{
-								"alias" : Utils.findOption(vTargetPath,Constants.VIRTUAL_TARGET_NAME),
+								"alias" : vTargetName,
 								"targets" : targetNames
 					});
 				}
