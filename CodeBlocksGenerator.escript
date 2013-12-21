@@ -78,12 +78,12 @@ CodeBlocksGenerator.createProject := fn(Node node){
 	outln("Code::Blocks...");
 	var projectPath;
 	{
-		var paths = Utils.collectNodePathsOfType([node],Constants.NODE_TYPE_PROJECT);
+		var paths = Utils.collectNodePathsByTrait([node],Std.require('EkkiEkkiKateng/NodeTraits/ProjectNodeTrait'));
 		if(paths.count()!=1)
 			Runtime.exception("Project description contains "+paths.count()+" projects. 1 is required!");
 		projectPath = paths.front();
 	}
-	outln("Project: ", Utils.findOption(projectPath,Constants.PROJECT_NAME) );
+	outln("Project: ", projectPath.back().getProjectName());
 //		print_r(projectPath);
 //	var pCompilerFlags = Utils.findOptions(projectPath,Constants.COMPILER_FLAGS);
 //	print_r(pCompilerFlags);
@@ -119,7 +119,7 @@ CodeBlocksGenerator.createProject := fn(Node node){
 	addTag(desc_projectFile,"FileVersion",{"major":"1","minor":"6"});
 	{
 		var desc_project = addTag(desc_projectFile,"Project");
-		addTag(desc_project,"Option",{"title" : Utils.findOption(projectPath,Constants.PROJECT_NAME)});
+		addTag(desc_project,"Option",{"title" : projectPath.back().getProjectName()});
 		addTag(desc_project,"Option",{"pch_mode" : "2" });
 		addTag(desc_project,"Option",{"compiler" : Utils.findOption(projectPath,Constants.COMPILER_ID) });
 		{ // build

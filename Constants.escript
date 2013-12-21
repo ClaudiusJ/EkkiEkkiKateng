@@ -21,7 +21,6 @@ Constants.TARGET_TYPE_CONSOLE_APP @(const) := $TARGET_TYPE_CONSOLE_APP;
 Constants.TARGET_OUTPUT @(const) := $TARGET_OUTPUT;
 Constants.TARGET_OBJ_FOLDER @(const) := $TARGET_OBJ_FOLDER;
 Constants.TARGET_WORKING_DIR @(const) := $TARGET_WORKING_DIR;
-Constants.PROJECT_NAME @(const) := $PROJECT_NAME;
 Constants.NAME @(const) := $NAME;
 Constants.NODE_TYPE @(const) := $NODE_TYPE;
 Constants.NODE_TYPE_FILE @(const) := $NODE_TYPE_FILE;

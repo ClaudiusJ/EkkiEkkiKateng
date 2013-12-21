@@ -11,9 +11,13 @@ var t = new (Std.require('Std/Traits/GenericTrait'))('EkkiEkkiKateng.ProjectNode
 
 static Node = Std.require('EkkiEkkiKateng/Node');
 
+static Constants = Std.require('EkkiEkkiKateng/Constants');
+t.attributes.getProjectName ::= fn(){
+	return this.getLocalOption( Constants.NAME );
+};
+
 t.onInit += fn(Node node, String projectName){
-	var Constants = Std.require('EkkiEkkiKateng/Constants');
 	Std.require('Std/Traits/basics').addTrait(node,Std.require('EkkiEkkiKateng/NodeTraits/_SpecificNodeTrait'),Constants.NODE_TYPE_PROJECT);
-	node.setOption( Constants.PROJECT_NAME, projectName);
+	node.setOption( Constants.NAME, projectName);
 };
 return t;

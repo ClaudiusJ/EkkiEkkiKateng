@@ -65,6 +65,14 @@ Utils.collectNodePathsOfType := fn(Array rootPath, type){
 	return resultPaths;
 };
 
+Utils.collectNodePathsByTrait := fn(Array rootPath, Traits.Trait trait){
+	var resultPaths = [];
+	traverseWithPath(rootPath, [resultPaths,trait] => fn(resultPaths,trait, path){
+		if( Traits.queryTrait(path.back(), trait) )
+			resultPaths += path.clone();
+	});
+	return resultPaths;
+};
 
 Utils.collectNodesByTrait := fn(Node rootNode, Traits.Trait trait){
 	var resultNodes = [];
