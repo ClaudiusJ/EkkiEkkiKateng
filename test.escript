@@ -10,25 +10,23 @@ loadOnce("./Std/basics.escript"); // load Std lib
 
 static Traits = Std.require('Std/Traits/basics');
 
-var Constants = Std.require('EkkiEkkiKateng/Constants');
-
-assert(Constants.VERSION >= 0.1);
+outln("Version: ",Std.require('EkkiEkkiKateng/Version') );
+assert(Std.require('EkkiEkkiKateng/Version') >= 0.1);
 
 var Node = Std.require('EkkiEkkiKateng/Node');
 var Utils = Std.require('EkkiEkkiKateng/Utils');
 
-var ProjectNodeTrait = Std.require('EkkiEkkiKateng/NodeTraits/ProjectNodeTrait');
-var FileNodeTrait = Std.require('EkkiEkkiKateng/NodeTraits/FileNodeTrait');
-var TargetNodeTrait = Std.require('EkkiEkkiKateng/NodeTraits/TargetNodeTrait');
-var VirtualTargetNodeTrait = Std.require('EkkiEkkiKateng/NodeTraits/VirtualTargetNodeTrait');
+var CompilerOptions = Std.require('EkkiEkkiKateng/CompilerOptions');
+var Projects = Std.require('EkkiEkkiKateng/Projects');
+var Files = Std.require('EkkiEkkiKateng/Files');
+var Targets = Std.require('EkkiEkkiKateng/Targets');
+var VirtualTargets = Std.require('EkkiEkkiKateng/VirtualTarget');
 
 
 var baseDir = __DIR__+"/..";
 
-var project = new Node;
-Traits.addTrait( project, ProjectNodeTrait, "EScript");	//! \see EkkiEkkiKateng/ProjectNodeTrait
-project.setOption( Constants.COMPILER_ID, "gcc");
-project.addOptions( Constants.COMPILER_FLAGS, [
+var project = Projects.createNode("EScript");
+CompilerOptions.addOptions(project, [
 			"-std=c++11",
 			"-pedantic","-Wall","-Wextra","-Wshadow","-Wcast-qual","-Wcast-align","-Wlogical-op",
 			"-Wredundant-decls","-Wdisabled-optimization","-Wstack-protector","-Winit-self","-Wmissing-include-dirs",
@@ -36,50 +34,41 @@ project.addOptions( Constants.COMPILER_FLAGS, [
 			"-Wold-style-cast","-Woverloaded-virtual","-Wno-pmf-conversions","-Wsign-promo","-Wmissing-declarations"
 ]);
 
-
+CompilerOptions.setCompilerId( project, "gcc");
 
 var allFiles = new Node;
 foreach(Utils.scanFiles( baseDir, [".cpp",".h",".escript",".txt",".rc"] ) as var filename){
-	if(filename.contains('- Kopie'))
-		continue;
-	var file = new Node;
-	Traits.addTrait( file, FileNodeTrait, filename);	//! \see EkkiEkkiKateng/FileNodeTrait
-	allFiles += file;
+	if(!filename.contains('- Kopie'))
+		allFiles += Files.createNode(filename);
 }
 
 {
-	var target = new Node;
-	Traits.addTrait( target, TargetNodeTrait, "StaticLib");	//! \see EkkiEkkiKateng/TargetNodeTrait
-	
-	target.setOption( Constants.TARGET_TYPE, Constants.TARGET_TYPE_STATIC_LIB);
-	target.setOption( Constants.TARGET_OUTPUT, "libEScript");
-	target.setOption( Constants.TARGET_OBJ_FOLDER, ".obj/dbgTest");
-	target.addOptions( Constants.COMPILER_FLAGS, [ "-g","-O3" ]);
-	target += allFiles;
-	project += target;
+	var targetNode = Targets.createNode("StaticLib");
+	Targets.setType_StaticLib( targetNode );
+	Targets.setOutput( targetNode,"libEScript");
+	Targets.setObjFolder( targetNode,".obj/dbgTest");
+	CompilerOptions.addOptions(targetNode, [ "-g","-O3" ]);
+	targetNode += allFiles;
+	project += targetNode;
 }
 
 {
-	var target = new Node;
-	Traits.addTrait( target, TargetNodeTrait, "Tests");	//! \see EkkiEkkiKateng/TargetNodeTrait
-	
-	target.setOption( Constants.TARGET_TYPE, Constants.TARGET_TYPE_CONSOLE_APP);
-	target.setOption( Constants.TARGET_OUTPUT, "EScriptTest");
-	target.setOption( Constants.TARGET_OBJ_FOLDER, ".obj/test");
-	target.setOption( Constants.TARGET_WORKING_DIR, ".");
-	target.addOptions( Constants.COMPILER_FLAGS, [ "-g","-O3","-DES_BUILD_TEST_APPLICATION" ]);
-	target += allFiles;
-	project += target;
+	var targetNode = Targets.createNode("Tests");
+	Targets.setType_ConsoleApp( targetNode );
+	Targets.setOutput( targetNode, "EScriptTest" );
+	Targets.setObjFolder( targetNode, ".obj/test");
+	Targets.setWorkingDir( targetNode, ".");
+	CompilerOptions.addOptions(targetNode,[ "-g","-O3","-DES_BUILD_TEST_APPLICATION" ]);
+	targetNode += allFiles;
+	project += targetNode;
 
-//	outln(allFiles.findOption(Constants.COMPILER_FLAGS,[project,target]));
 }
 
 {
-	var vTarget = new Node;
-	Traits.addTrait( vTarget, VirtualTargetNodeTrait, "All");	//! \see EkkiEkkiKateng/VirtualTargetNodeTrait
-	foreach( Utils.collectNodePathsOfType( [project], Constants.NODE_TYPE_TARGET ) as var targetPath)
-		vTarget += targetPath.back();
-	
+	var vTarget = VirtualTargets.createNode("All");
+	foreach( Targets.collect( project ) as var target)
+		vTarget += target;
+
 	project += vTarget;
 	outln( vTarget.toDbgString() );
 }

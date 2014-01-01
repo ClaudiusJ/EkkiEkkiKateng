@@ -8,8 +8,6 @@
 assert(EScript.VERSION>=607); // 0.6.7
 
 static Node = Std.require('EkkiEkkiKateng/Node');
-static Constants = Std.require('EkkiEkkiKateng/Constants');
-static Traits = Std.require('Std/Traits/basics');
 
 /*! (internal) if callback(node) returns...
 		$BREAK, the traversal of the subtree is stopped.
@@ -25,8 +23,10 @@ static traverse = fn(Node rootNode, callback){
 			case $EXIT:
 				return;
 			default:
-				foreach(node.getNextNodes() as var nextNode)
-					todo += nextNode;
+				if(node.isTransient()){
+					foreach(node.getNextNodes() as var nextNode)
+						todo += nextNode;
+				}
 		}
 	}
 };
@@ -44,10 +44,12 @@ static traverseWithPath = fn(Array rootPath, callback){
 			case $EXIT:
 				return;
 			default:
-				foreach(activePath.back().getNextNodes() as var nextNode){
-					var p = activePath.clone();
-					p += nextNode;
-					todo += p;
+				if(activePath==rootPath || activePath.back().isTransient()){
+					foreach(activePath.back().getNextNodes() as var nextNode){
+						var p = activePath.clone();
+						p += nextNode;
+						todo += p;
+					}
 				}
 		}
 	}
@@ -56,34 +58,28 @@ static traverseWithPath = fn(Array rootPath, callback){
 
 var Utils = new Namespace;
 
-Utils.collectNodePathsOfType := fn(Array rootPath, type){
-	var resultPaths = [];
-	traverseWithPath(rootPath, [resultPaths,type] => fn(resultPaths,type, path){
-		if( path.back().getLocalOption(Constants.NODE_TYPE) == type )
-			resultPaths += path.clone();
-	});
-	return resultPaths;
-};
+Utils.traverseWithPath := traverseWithPath;
 
-Utils.collectNodePathsByTrait := fn(Array rootPath, Traits.Trait trait){
-	var resultPaths = [];
-	traverseWithPath(rootPath, [resultPaths,trait] => fn(resultPaths,trait, path){
-		if( Traits.queryTrait(path.back(), trait) )
-			resultPaths += path.clone();
-	});
-	return resultPaths;
-};
-
-Utils.collectNodesByTrait := fn(Node rootNode, Traits.Trait trait){
-	var resultNodes = [];
-	traverse(rootNode, [resultNodes,trait] => fn(resultNodes,trait,node){ if(Traits.queryTrait(node,trait)) resultNodes += node; });
-	return resultNodes;
-};
-
-Utils.collectNodesByType := fn(Node rootNode, type){
-	var resultNodes = [];
-	traverse(rootNode, [resultNodes,type] => fn(resultNodes,type,node){ if(node.getLocalOption(Constants.NODE_TYPE)==type) resultNodes += node; });
-	return resultNodes;
+Utils.collectNextHavingOption := fn([Array,Node] pathOrNode, option){
+	if(pathOrNode---|>Node){
+		var resultNodes = [];
+		traverse(pathOrNode, [resultNodes,option] => fn(resultNodes,option, node){
+			if( node.hasLocalOption(option) ){
+				resultNodes += node;
+				return $BREAK;
+			}
+		});
+		return resultNodes;
+	}else{
+		var resultPaths = [];
+		traverseWithPath(pathOrNode, [resultPaths,option] => fn(resultPaths,option, path){
+			if( path.back().hasLocalOption(option) ){
+				resultPaths += path.clone();
+				return $BREAK;
+			}
+		});
+		return resultPaths;
+	}
 };
 
 static findOptions = fn(Array path, [Identifier,String] key){
@@ -99,30 +95,37 @@ static findOptions = fn(Array path, [Identifier,String] key){
 	}
 	return options;
 };
-Utils.findOptions := findOptions;
-Utils.findOption := fn(Array path, [Identifier,String] key, default=void){
-	var options = findOptions(path,key);
-	return options.empty() ? default : options.implode(" ");
+Utils.findOptions := fn([Array,Node] pathOrNode, p...){
+	return pathOrNode---|>Node ? findOptions([pathOrNode],p...) : findOptions(pathOrNode,p...);
 };
-Utils.scanFiles := fn(String sourceDir, [void,Array] endings=void){
-	sourceDir = IO.condensePath(sourceDir);
-	if(sourceDir.empty())
-		sourceDir = ".";
-	var allFiles = IO.dir(sourceDir,IO.DIR_RECURSIVE|IO.DIR_FILES).map(
-					fn(key,path){return path.beginsWith("./") ? path.substr(2):path; });
-	if(!endings)
-		return allFiles;
-
-	var files = [];
-	foreach(allFiles as var file){
-		foreach(endings as var e){
-			if(file.endsWith(e)){
-				files += file;
-				break;
-			}
-		}
+Utils.findOption := fn([Array,Node] pathOrNode, [Identifier,String] key, default=void){
+	if(pathOrNode---|>Node){
+		return pathOrNode.hasLocalOption(key) ? pathOrNode.getLocalOption(key) : default;
+	}else{
+		var options = findOptions(pathOrNode,key);
+		return options.empty() ? default : options.implode(" ");
 	}
-	return files;
+};
+Utils.setOption := fn([Array,Node] pathOrNode, key, value){
+	if(pathOrNode---|>Node){
+		pathOrNode.setOption(key,value);
+	}else{
+		pathOrNode.back().setOption(key,value);
+	}
+};
+Utils.addOption := fn(pathOrNode,p...){
+	if(pathOrNode---|>Node){
+		pathOrNode.addOption(p...);
+	}else{
+		pathOrNode.back().addOption(p...);
+	}
+};
+Utils.addOptions := fn(pathOrNode,p...){
+	if(pathOrNode---|>Node){
+		pathOrNode.addOptions(p...);
+	}else{
+		pathOrNode.back().addOptions(p...);
+	}
 };
 
 return Utils;

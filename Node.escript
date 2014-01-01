@@ -12,6 +12,8 @@ Node._printableName @(override) ::= $EkkiEkkiKateng_Node;
 Node.options @(init) := Map;
 Node.incrementalOptions @(init) := Map;
 Node.nextNodes @(init) := Std.require('Std/Set');
+Node.sortedNextNodes @(init) := Array;
+Node.transient := true;
 
 Node.addOptions ::= fn([Identifier,String] key,Array values){
 	if(!this.incrementalOptions[key])
@@ -23,24 +25,36 @@ Node.addOption ::= fn([Identifier,String] key,value){
 };
 
 Node.getNextNodes ::= fn(){
-	return this.nextNodes;
+	return this.sortedNextNodes;
 };
 Node.getLocalOption ::= fn([Identifier,String] key){
 	return this.options[key];
 };
+Node.hasLocalOption ::= fn([Identifier,String] key){
+	return this.options.containsKey(key);
+};
 Node.setOption ::= fn([Identifier,String] key,value){
 	this.options[key] = value;
 };
+Node.isTransient ::= fn(){
+	return this.transient;
+};
 Node.toDbgString ::= fn(){
-	var s = "Node("+ toJSON(this.options,false)+", "+toJSON(this.incrementalOptions,false);
-	foreach(this.nextNodes as var n){
-		s+="\n-> "+n.toDbgString();
-	}
+	var s = "Node("+ toJSON(this.options,false)+", "+toJSON(this.incrementalOptions,false)+","+this.nextNodes.count()+" children";
+//	foreach(this.nextNodes as var n){
+//		s+="\n-> "+n.toDbgString();
+//	}
 	s+=")";
 	return s;
 };
+Node.setTransient ::= fn(Bool b){
+	this.transient = b;
+};
 Node."+=" ::= fn(Node other){
-	this.nextNodes += other;
+	if(!this.nextNodes.contains(other)){
+		this.nextNodes += other;
+		this.sortedNextNodes += other;
+	}
 	return this;
 };
 
