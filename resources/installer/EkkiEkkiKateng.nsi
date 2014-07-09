@@ -139,8 +139,8 @@ SectionIn 1 2
 WriteRegStr HKCR "EkkiEkkiKateng.1" "" "EkkiEkkiKateng project generator"
 WriteRegStr HKCR "EkkiEkkiKateng.1" "FriendlyTypeName" "@EkkiEkkiKateng, -120"
 WriteRegStr HKCR "EkkiEkkiKateng.1\CurVer" "" "EkkiEkkiKateng.1"
-WriteRegStr HKCR "EkkiEkkiKateng.1\DefaultIcon" "" "$INSTDIR\EScript.exe,0"
-WriteRegStr HKCR "EkkiEkkiKateng.1\shell\open\command" "" '"$INSTDIR\EScript.exe" "%1"'
+WriteRegStr HKCR "EkkiEkkiKateng.1\DefaultIcon" "" "$INSTDIR\EScript\EScript.exe,0"
+WriteRegStr HKCR "EkkiEkkiKateng.1\shell\open\command" "" '"$INSTDIR\EScript\EScript.exe" "%1"'
 WriteRegStr HKCR ".ekki" "" "EkkiEkkiKateng.1"
 
 SectionEnd
