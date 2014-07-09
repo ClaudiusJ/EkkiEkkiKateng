@@ -1,12 +1,12 @@
 /* ----------------------------------------------------------------
 	This file is part of the EkkiEkkiKateng build tool.
-	Copyright (C) 2013 Claudius Jähn (claudiusj@users.berlios.de)
+	Copyright (C) 2013-2014 Claudius Jähn (ClaudiusJ@live.de)
 	Licensed under the MIT License. See LICENSE file for details.
 	https://github.com/ClaudiusJ/EkkiEkkiKateng
    ---------------------------------------------------------------- */
 var CompilerOptions = new Namespace;
 
-static Utils = Std.require('EkkiEkkiKateng/Utils');
+static Utils = module('./Utils');
 
 CompilerOptions.getOptions := fn(path){	return Utils.findOptions(path, $COMPILER_OPTIONS);	};
 

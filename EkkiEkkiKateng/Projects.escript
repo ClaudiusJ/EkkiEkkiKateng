@@ -1,14 +1,14 @@
 /* ----------------------------------------------------------------
 	This file is part of the EkkiEkkiKateng build tool.
-	Copyright (C) 2013 Claudius Jähn (claudiusj@users.berlios.de)
+	Copyright (C) 2013-2014 Claudius Jähn (ClaudiusJ@live.de)
 	Licensed under the MIT License. See LICENSE file for details.
 	https://github.com/ClaudiusJ/EkkiEkkiKateng
    ---------------------------------------------------------------- */
 var Projects = new Namespace;
 
 
-static Node = Std.require('EkkiEkkiKateng/Node');
-static Utils = Std.require('EkkiEkkiKateng/Utils');
+static Node = module('./Node');
+static Utils = module('./Utils');
 
 Projects.createNode := fn(name=void){
 	var n = new Node;

@@ -1,11 +1,11 @@
 /* ----------------------------------------------------------------
 	This file is part of the EkkiEkkiKateng build tool.
-	Copyright (C) 2013 Claudius Jähn (claudiusj@users.berlios.de)
+	Copyright (C) 2013-2014 Claudius Jähn (ClaudiusJ@live.de)
 	Licensed under the MIT License. See LICENSE file for details.
 	https://github.com/ClaudiusJ/EkkiEkkiKateng
    ---------------------------------------------------------------- */
 
-assert(EScript.VERSION>=607); // 0.6.7
+assert(EScript.VERSION>=701); // 0.7.1
 
 var FileUtils = new Namespace;
 
@@ -32,7 +32,7 @@ static scanFiles = fn(String sourceDir, [void,Array] endings=void){
 FileUtils.scanFiles := scanFiles;
 
 FileUtils.scanForKeywords := fn(String prefix, String path, Array endings){
-	var defines = new (Std.require('Std/Set'));
+	var defines = new (module('Std/Set'));
 	foreach(scanFiles(path, endings) as var filename){
 		var file = IO.loadTextFile(filename);
 		var pos = 0;

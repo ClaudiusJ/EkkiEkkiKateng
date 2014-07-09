@@ -1,13 +1,13 @@
 /* ----------------------------------------------------------------
 	This file is part of the EkkiEkkiKateng build tool.
-	Copyright (C) 2013 Claudius Jähn (claudiusj@users.berlios.de)
+	Copyright (C) 2013-2014 Claudius Jähn (ClaudiusJ@live.de)
 	Licensed under the MIT License. See LICENSE file for details.
 	https://github.com/ClaudiusJ/EkkiEkkiKateng
    ---------------------------------------------------------------- */
 
-assert(EScript.VERSION>=607); // 0.6.7
+assert(EScript.VERSION>=701); // 0.7.1
 
-static Node = Std.require('EkkiEkkiKateng/Node');
+static Node = module('./Node');
 
 /*! (internal) if callback(node) returns...
 		$BREAK, the traversal of the subtree is stopped.

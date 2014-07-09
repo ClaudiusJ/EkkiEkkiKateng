@@ -1,16 +1,19 @@
 /* ----------------------------------------------------------------
 	This file is part of the EkkiEkkiKateng build tool.
-	Copyright (C) 2013 Claudius Jähn (claudiusj@users.berlios.de)
+	Copyright (C) 2013-2014 Claudius Jähn (ClaudiusJ@live.de)
 	Licensed under the MIT License. See LICENSE file for details.
 	https://github.com/ClaudiusJ/EkkiEkkiKateng
    ---------------------------------------------------------------- */
+
+assert(EScript.VERSION>=701); // 0.7.1
+ 
 var LinkerOptions = new Namespace;
 
-static Utils = Std.require('EkkiEkkiKateng/Utils');
+static Utils = module('./Utils');
 
-LinkerOptions.getOptions := fn(path){	return Utils.findOptions(path, $LINKER_OPTIONS);	};
+LinkerOptions.getOptions :=		fn(path){	return Utils.findOptions(path, $LINKER_OPTIONS);	};
 
-LinkerOptions.addOption := 	fn(pathOrNode, String value){	Utils.addOption(pathOrNode,$LINKER_OPTIONS,value); };
+LinkerOptions.addOption := 		fn(pathOrNode, String value){	Utils.addOption(pathOrNode,$LINKER_OPTIONS,value); };
 LinkerOptions.addOptions := 	fn(pathOrNode, Array values){	Utils.addOptions(pathOrNode,$LINKER_OPTIONS,values); };
 
 LinkerOptions.getSearchPaths :=	fn(pathOrNode){		return Utils.findOptions(pathOrNode, $LINKER_OPTIONS_SEARCH_PATH);	};

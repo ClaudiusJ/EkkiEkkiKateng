@@ -1,0 +1,3 @@
+[submodule "EScript"]
+	path = EScript
+	url = https://github.com/EScript/EScript.git

@@ -1,15 +1,15 @@
 /* ----------------------------------------------------------------
 	This file is part of the EkkiEkkiKateng build tool.
-	Copyright (C) 2013 Claudius Jähn (claudiusj@users.berlios.de)
+	Copyright (C) 2013-2014 Claudius Jähn (ClaudiusJ@live.de)
 	Licensed under the MIT License. See LICENSE file for details.
 	https://github.com/ClaudiusJ/EkkiEkkiKateng
    ---------------------------------------------------------------- */
 
-assert(EScript.VERSION>=607); // 0.6.7
+assert(EScript.VERSION>=701); // 0.7.1
 
-static Node = Std.require('EkkiEkkiKateng/Node');
-static Utils = Std.require('EkkiEkkiKateng/Utils');
-static Set = Std.require('Std/Set');
+static Node = module('./Node');
+static Utils = module('./Utils');
+static Set = module('Std/Set');
 
 static addTag = fn(Map container,name,attributes = void){
 	if(!container['children'])
@@ -68,13 +68,13 @@ static toXML = fn(Map description){
 	return result.implode("\n");
 };
 
-static CompilerOptions = Std.require('EkkiEkkiKateng/CompilerOptions');
-static ExternalLibs = Std.require('EkkiEkkiKateng/ExternalLibs');
-static Files = Std.require('EkkiEkkiKateng/Files');
-static LinkerOptions = Std.require('EkkiEkkiKateng/LinkerOptions');
-static Projects = Std.require('EkkiEkkiKateng/Projects');
-static Targets = Std.require('EkkiEkkiKateng/Targets');
-static VirtualTargets = Std.require('EkkiEkkiKateng/VirtualTargets');
+static CompilerOptions = module('./CompilerOptions');
+static ExternalLibs = module('./ExternalLibs');
+static Files = module('./Files');
+static LinkerOptions = module('./LinkerOptions');
+static Projects = module('./Projects');
+static Targets = module('./Targets');
+static VirtualTargets = module('./VirtualTargets');
 
 
 static getTargetOptions = fn(targetPath){
